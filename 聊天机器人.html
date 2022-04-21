@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/main.css" />
+    <script type="text/javascript" src="js/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="js/jquery.mousewheel.js"></script>
+    <title>聊天机器人</title>
+</head>
+
+<body>
+    <div class="wrap">
+        <!-- 头部 Header 区域 -->
+        <div class="header">
+            <h3>小艾</h3>
+            <img src="img/person01.png" alt="icon" />
+        </div>
+        <!-- 中间 聊天内容区域 -->
+        <div class="main">
+            <ul class="talk_list" style="top: 0px;">
+                <!-- <li class="left_word">
+                    <img src="img/person01.png" /> <span></span>
+                </li>
+                <li class="right_word">
+                    <img src="img/person02.png" /> <span>你好哦</span>
+                </li>
+                <li class="left_word">
+                    <img src="img/person01.png" /> <span>你好</span>
+                </li>
+                <li class="right_word">
+                    <img src="img/person02.png" /> <span>你好哦</span>
+                </li>
+                <li class="left_word">
+                    <img src="img/person01.png" /> <span>你好</span>
+                </li>
+                <li class="right_word">
+                    <img src="img/person02.png" /> <span>你好哦</span>
+                </li>
+                <li class="left_word">
+                    <img src="img/person01.png" /> <span> 你好</span>
+                </li>
+                <li class="right_word">
+                    <img src="img/person02.png" /> <span>你好哦</span>
+                </li>
+                <li class="left_word">
+                    <img src="img/person01.png" /> <span>你好</span>
+                </li>
+                <li class="right_word">
+                    <img src="img/person02.png" /> <span>你好哦</span>
+                </li>
+                <li class="left_word">
+                    <img src="img/person01.png" /> <span>你好</span>
+                </li>
+                <li class="right_word">
+                    <img src="img/person02.png" /> <span>你好哦</span>
+                </li> -->
+            </ul>
+            <div class="drag_bar" style="display: none;">
+                <div class="drager ui-draggable ui-draggable-handle" style="display: none; height: 412.628px;"></div>
+            </div>
+        </div>
+        <!-- 底部 消息编辑区域 -->
+        <div class="footer">
+            <img src="img/person02.png" alt="icon" />
+            <input type="text" placeholder="说的什么吧..." class="input_txt" />
+            <input type="button" value="发 送" class="input_sub" />
+        </div>
+    </div>
+    <script type="text/javascript" src="js/scroll.js"></script>
+    <script src="./js/axios.js"></script>
+    <script>
+        $(function() {
+                // 初始化右侧滚动条
+                // 这个方法定义在scroll.js中
+                resetui()
+            })
+            //接口  'http://www.liulongbin.top:3009/api/synthesize'
+            //axios全局配置
+        axios.defaults.baseURL = 'http://www.liulongbin.top:3009';
+        //获取元素
+        const textIP = document.querySelector('.input_txt')
+        const send = document.querySelector('.input_sub')
+        const ul = document.querySelector('.talk_list')
+        let flag = null
+        console.log(flag);
+        //点击发送按钮把input里面的内容渲染进页面
+        send.addEventListener('click', function() {
+                let text = textIP.value.trim()
+                    // console.log(textIP.value);
+                if (text.length === 0) {
+                    return
+                }
+                //渲染进页面
+                let li = document.createElement('li')
+                li.classList.add('right_word')
+                li.innerHTML = `
+            <img src="img/person02.png" /> <span>${textIP.value}</span>
+            `
+                ul.append(li)
+                resetui()
+                    //清空inp
+                textIP.value = ''
+                    //发送数据 使机器人回复消息
+                axios.get('/api/robot', {
+                        params: {
+                            spoken: text
+                        }
+                    }).then(({
+                        data: {
+                            data: {
+                                info
+                            }
+                        }
+                    }) => {
+                        console.log(info);
+                        //把服务器请求回来的数据填入内容
+                        //渲染进页面
+                        flag = info.text
+                        let li = document.createElement('li')
+                        li.classList.add('left_word')
+                        li.innerHTML = `
+                        <img src="img/person01.png" /> <span>${info.text}</span>
+                        `
+                        ul.append(li)
+                        resetui()
+                    })
+                    /* 发送数据 使机器人回复语音消息 */
+                axios.get('/api/synthesize', {
+                    params: {
+                        text: text
+                    }
+                }).then(({
+                    data
+                }) => {
+                    console.log(data);
+                    //把服务器请求回来的数据填入内容
+                    //渲染进页面
+                    let li = document.createElement('li')
+                    li.classList.add('left_word')
+                    li.innerHTML = `
+                        <img src="img/person01.png" /> <span> <audio src="${data.voiceUrl}" controls></audio></span>
+                        `
+                    ul.append(li)
+                    resetui()
+                })
+            })
+            //回车发送信息
+        textIP.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                send.click()
+            }
+        })
+    </script>
+</body>
+
+</html>
