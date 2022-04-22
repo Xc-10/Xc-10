@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>案例-头像上传</title>
+    <link rel="stylesheet" href="./lib/bootstrap-v4.6.0.css">
+    <style>
+        .thumb-box {
+            text-align: center;
+            margin-top: 50px;
+        }
+        
+        .thumb {
+            width: 250px;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="thumb-box">
+        <!-- 头像 -->
+        <img src="./images/cover.jpg" class="img-thumbnail thumb" alt="">
+        <div class="mt-2">
+            <!-- 文件选择框 -->
+            <!-- accept 属性表示可选择的文件类型 -->
+            <!-- image/* 表示只允许选择图片类型的文件 -->
+            <input type="file" id="iptFile" accept="image/*" style="display: none;">
+            <!-- 选择头像图片的按钮 -->
+            <button class="btn btn-primary" id="btnChoose">选择 & 上传图片</button>
+        </div>
+    </div>
+
+    <script src="./lib/jquery-v3.6.0.js"></script>
+    <script src="./lib/axios.js"></script>
+
+
+    <script>
+        //需求：
+        //利用formdata实现头像上传 上传参数名称 avatar
+        //必需接口
+        // post('http://www.liulongbin.top:3009/api/upload/avatar'
+        /* 获取元素 */
+        const btn = document.querySelector('.btn ')
+        const iptFile = document.querySelector('#iptFile')
+        const img = document.querySelector('img')
+            //点击选择按钮上传
+        btn.addEventListener('click', function() {
+                //file点击方法
+                iptFile.click()
+            })
+            //当file上传发生改变时 将上传的图片信息交给服务器 使用服务器返回的地址更改图片路径
+        iptFile.addEventListener('change', function(e) {
+            console.log(e.target.files);
+            //没有上传信息就不进行任何操作
+            if (e.target.files.length === 0) {
+                return
+            }
+            //将文件上传到Formdata中
+            let fd = new FormData()
+            fd.append('avatar', e.target.files[0])
+                //发送请求
+            axios.post('http://www.liulongbin.top:3009/api/upload/avatar', fd).then(({
+                data
+            }) => {
+                //文件上传成功
+                img.src = `http://www.liulongbin.top:3009${data.url}`
+                alert(data.message)
+            })
+
+
+
+        })
+    </script>
+</body>
+
+</html>
